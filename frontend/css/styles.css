@@ -1,0 +1,50 @@
+.form{
+    color:aqua;
+    text-decoration: line-through;
+    display: block;
+}
+
+.bebr{
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+#bebra1{
+    color: blue;
+}
+
+#bebra1btn{
+    font-size: 20px;
+    padding: 15px 32px;
+    border: none;
+    background-color: green;
+    display:block;
+    width: 100%;
+    margin: 10px;
+    
+}
+
+#bebra1btn:hover{
+    background: rgb(106, 189, 12);
+}
+
+.bebraHeader ul li{
+    display: inline-block;
+    width: 32%;
+    text-align: center;
+    background: rgb(112, 109, 109);
+}
+
+.bebraHeader ul li:hover{
+    background: rgb(227, 132, 132);
+}
+
+.bebraFooter{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    text-align: center;
+    display: inline;
+    width: 100%;
+}
