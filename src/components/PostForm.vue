@@ -11,7 +11,12 @@
         class="input"
         type="text"
         placeholder="Описание">
-    <button class="btn">Создать</button>
+    <button
+        class="btn"
+        @click="createPost"
+    >
+      Создать
+    </button>
   </form>
 </template>
 
@@ -24,6 +29,16 @@ export default {
         body: ''
       }
     }
+  },
+  methods:{
+    createPost() {
+      this.post.id = Date.now();
+      this.$emit('create',this.post)
+      this.post = {
+        title: '',
+        body: ''
+      }
+    },
   }
 }
 </script>
