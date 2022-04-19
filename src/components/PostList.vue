@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="posts.length > 0"> <!-- v-show="условие" чтобы элемент не исчезал из DOM дерева-->
     <h3>Список постов</h3>
     <post-item
         v-for="post in posts"
@@ -8,6 +8,9 @@
         @remove = "$emit('remove',post)"
     />
   </div>
+  <h2 v-else style="color: red">
+    Список постов пуст
+  </h2>
 
 </template>
 
