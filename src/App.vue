@@ -28,7 +28,7 @@
     </my-dialog>
 
     <post-list
-        v-bind:posts="posts"
+        v-bind:posts="sortedPosts"
         @remove="removePost"
         v-if="!isPostsLoading"
     />
@@ -86,7 +86,24 @@ export default {
   },
   mounted(){
     this.fetchPosts();
-  }
+  },
+  computed:{
+    sortedPosts(){ //... - оператор spread, в данном случае создание нового массива на основе существующего
+      return [...this.posts].sort((post1,post2)=>{ //в данном случае sort возвращает новый массив
+        return post1[this.selectedSort]?.localeCompare(post2[this.selectedSort])});
+    },
+  },
+  // watch: { //следим за моделью selectedSort
+  //   selectedSort(newValue) { //функция-наблюдатель должна иметь такое же имя, что и модель за которой наблюдает
+  //     //console.log(newValue);
+  //     this.posts.sort((post1,post2)=>{ //в данном случае sort мутирует исходный массив
+  //       return post1[this.selectedSort]?.localeCompare(post2[this.selectedSort]);
+  //     })
+  //   },
+  //   dialogVisible(newValue){
+  //     console.log(newValue);
+  //   }
+  // }
 }
 </script>
 

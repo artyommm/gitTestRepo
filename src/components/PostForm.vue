@@ -37,6 +37,17 @@ export default {
         body: ''
       }
     },
+  },
+  watch: {
+    // post(newValue){ //watch срабатывает только единожды при создании
+    //   console.log(newValue);
+    // }
+    // post:{
+    //   handler(newValue){  //срабатывает при изменении полей объекта post
+    //     console.log(newValue);
+    //   },
+    //   deep: true, //глубокое отслеживание
+    // }
   }
 }
 </script>
