@@ -38,19 +38,11 @@
 
     <div v-else>Идёт загрузка...</div>
 
-    <div class="page__wrapper">
-      <div
-          v-for="pageNumber in totalPages"
-          :key="pageNumber"
-          class="page"
-          :class="{
-            'current-page': page === pageNumber
-          }"
-          @click="changePage(pageNumber)"
-      >
-        {{pageNumber}}
-      </div>
-    </div>
+    <post-pagination
+        v-bind:totalPages = "totalPages"
+        v-model:page="page"
+    />
+
 
   </div>
 
@@ -59,11 +51,12 @@
 <script>
 import PostForm from "@/components/PostForm";
 import PostList from "@/components/PostList";
+import PostPagination from "@/components/PostPagination";
 import axios from 'axios';
 
 export default {
   components:{
-    PostList, PostForm
+    PostList, PostForm, PostPagination
   },
   data() {
     return {
@@ -159,20 +152,6 @@ export default {
   margin: 15px 0px;
   display: flex;
   justify-content: space-between;
-}
-
-.page__wrapper{
-  display: flex;
-  margin-top: 15px;
-}
-
-.page{
-  border: 1px solid black;
-  padding: 10px;
-}
-
-.current-page{
-  border: 2px solid green;
 }
 
 </style>
