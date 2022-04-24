@@ -38,6 +38,20 @@
 
     <div v-else>Идёт загрузка...</div>
 
+    <div class="page__wrapper">
+      <div
+          v-for="pageNumber in totalPages"
+          :key="pageNumber"
+          class="page"
+          :class="{
+            'current-page': page === pageNumber
+          }"
+          @click="changePage(pageNumber)"
+      >
+        {{pageNumber}}
+      </div>
+    </div>
+
   </div>
 
 </template>
@@ -58,6 +72,9 @@ export default {
       isPostsLoading: false,
       selectedSort: '',
       searchQuery: '',
+      page: 1, //номер страницы
+      limit: 10, //максимальное количество постов на одной странице
+      totalPages: 0, //общее число страниц
       sortOptions: [
         {value: 'title', name: 'По названию'},
         {value: 'body', name: 'По описанию'},
@@ -79,13 +96,22 @@ export default {
     async fetchPosts(){
       try {
         this.isPostsLoading = true;
-        const response = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10');
+        const response = await axios.get('https://jsonplaceholder.typicode.com/posts',{
+          params:{
+            _page: this.page,
+            _limit: this.limit,
+          }
+        });
+        this.totalPages = Math.ceil(response.headers['x-total-count']/this.limit);
         this.posts = response.data;
       }catch (e) {
         alert(e);
       }finally {
         this.isPostsLoading=false;
       }
+    },
+    changePage(pageNumber){
+      this.page = pageNumber;
     }
   },
   mounted(){
@@ -101,17 +127,20 @@ export default {
       return this.sortedPosts.filter(post => post.title.toLowerCase().includes(this.searchQuery.toLowerCase()));
     }
   },
-  // watch: { //следим за моделью selectedSort
-  //   selectedSort(newValue) { //функция-наблюдатель должна иметь такое же имя, что и модель за которой наблюдает
-  //     //console.log(newValue);
-  //     this.posts.sort((post1,post2)=>{ //в данном случае sort мутирует исходный массив
-  //       return post1[this.selectedSort]?.localeCompare(post2[this.selectedSort]);
-  //     })
-  //   },
-  //   dialogVisible(newValue){
-  //     console.log(newValue);
-  //   }
-  // }
+  watch: { //следим за моделью selectedSort
+    // selectedSort(newValue) { //функция-наблюдатель должна иметь такое же имя, что и модель за которой наблюдает
+    //   //console.log(newValue);
+    //   this.posts.sort((post1,post2)=>{ //в данном случае sort мутирует исходный массив
+    //     return post1[this.selectedSort]?.localeCompare(post2[this.selectedSort]);
+    //   })
+    // },
+    // dialogVisible(newValue){
+    //   console.log(newValue);
+    // }
+    page(){
+      this.fetchPosts();
+    }
+  }
 }
 </script>
 
@@ -132,5 +161,18 @@ export default {
   justify-content: space-between;
 }
 
+.page__wrapper{
+  display: flex;
+  margin-top: 15px;
+}
+
+.page{
+  border: 1px solid black;
+  padding: 10px;
+}
+
+.current-page{
+  border: 2px solid green;
+}
 
 </style>
