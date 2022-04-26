@@ -38,10 +38,12 @@
 
     <div v-else>Идёт загрузка...</div>
 
-    <post-pagination
-        v-bind:totalPages = "totalPages"
-        v-model:page="page"
-    />
+    <div ref="observer" class="observer"></div>
+
+<!--    <post-pagination-->
+<!--        v-bind:totalPages = "totalPages"-->
+<!--        v-model:page="page"-->
+<!--    />-->
 
 
   </div>
@@ -103,12 +105,44 @@ export default {
         this.isPostsLoading=false;
       }
     },
-    changePage(pageNumber){
-      this.page = pageNumber;
-    }
+
+    async loadMorePosts(){
+      try {
+        this.page+=1;
+        // this.isPostsLoading = true;
+        const response = await axios.get('https://jsonplaceholder.typicode.com/posts',{
+          params:{
+            _page: this.page,
+            _limit: this.limit,
+          }
+        });
+        this.totalPages = Math.ceil(response.headers['x-total-count']/this.limit);
+        this.posts = [...this.posts, ...response.data];
+      }catch (e) {
+        alert(e);
+      }finally {
+        // this.isPostsLoading=false;
+      }
+    },
+    // changePage(pageNumber){
+    //   this.page = pageNumber;
+    // }
   },
   mounted(){
     this.fetchPosts();
+    console.log(this.$refs.observer);
+    const options = {
+      rootMargin: '0px',
+      threshold: 1.0
+    }
+    const callback = (entries, observer) => {
+      if(entries[0].isIntersecting && this.page < this.totalPages){
+        this.loadMorePosts();
+        console.log('ПЕРЕСЕЧЕНИЕ')
+      }
+    };
+    const observer = new IntersectionObserver(callback, options);
+    observer.observe(this.$refs.observer);
   },
   computed:{
     sortedPosts(){ //... - оператор spread, в данном случае создание нового массива на основе существующего
@@ -130,9 +164,10 @@ export default {
     // dialogVisible(newValue){
     //   console.log(newValue);
     // }
-    page(){
-      this.fetchPosts();
-    }
+
+    // page(){
+    //   this.fetchPosts();
+    // }
   }
 }
 </script>
@@ -152,6 +187,11 @@ export default {
   margin: 15px 0px;
   display: flex;
   justify-content: space-between;
+}
+
+.observer{
+  height: 30px;
+  background: green;
 }
 
 </style>
