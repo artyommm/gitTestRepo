@@ -1,15 +1,16 @@
 <template>
   <div >
-    <h1>{{$store.state.isAuth ? "Пользователь авторизован" : "Авторизируйтесь, чтобы использовать сервис"}}</h1>
-    <h1>{{$store.state.likes}}</h1>
-    <h1>{{$store.getters.doubleLikes}}</h1>
-    <div>
-      <my-button @click="$store.commit('incrementLikes')">Лайк</my-button>
-      <my-button @click="$store.commit('decrementLikes')">Дизлайк</my-button>
-    </div>
+<!--    <h1>{{$store.state.isAuth ? "Пользователь авторизован" : "Авторизируйтесь, чтобы использовать сервис"}}</h1>-->
+<!--    <h1>{{$store.state.likes}}</h1>-->
+<!--    <h1>{{$store.getters.doubleLikes}}</h1>-->
+<!--    <div>-->
+<!--      <my-button @click="$store.commit('incrementLikes')">Лайк</my-button>-->
+<!--      <my-button @click="$store.commit('decrementLikes')">Дизлайк</my-button>-->
+<!--    </div>-->
     <h1>Страница с постами</h1>
     <my-input
-        v-model="searchQuery"
+        :model-value="searchQuery"
+        @update:model-value="setSearchQuery"
         placeholder="Поиск..."
         v-focus
     />
@@ -20,7 +21,8 @@
         Создать пост</my-button>
 
       <my-select
-          v-model="selectedSort"
+          :model-value="selectedSort"
+          @update:model-value="setSelectedSort"
           :options="sortOptions"
       />
     </div>
@@ -48,10 +50,10 @@
 
 <!--    <div ref="observer" class="observer"></div>-->
     <div v-intersection="loadMorePosts" class="observer"></div>
-    <!--    <post-pagination-->
-    <!--        v-bind:totalPages = "totalPages"-->
-    <!--        v-model:page="page"-->
-    <!--    />-->
+<!--        <post-pagination-->
+<!--            v-bind:totalPages = "totalPages"-->
+<!--            v-model:page="page"-->
+<!--        />-->
 
 
   </div>
@@ -63,6 +65,7 @@ import PostForm from "@/components/PostForm";
 import PostList from "@/components/PostList";
 import PostPagination from "@/components/PostPagination";
 import axios from 'axios';
+import {mapState, mapGetters, mapActions, mapMutations} from 'vuex'
 
 export default {
   components:{
@@ -70,68 +73,34 @@ export default {
   },
   data() {
     return {
-      posts: [],
-      dialogVisible: false,
-      isPostsLoading: false,
-      selectedSort: '',
-      searchQuery: '',
-      page: 1, //номер страницы
-      limit: 10, //максимальное количество постов на одной странице
-      totalPages: 0, //общее число страниц
-      sortOptions: [
-        {value: 'title', name: 'По названию'},
-        {value: 'body', name: 'По описанию'},
-      ]
+      //dialogVisible: false,
     }
   },
   methods: {
-    createPost(post) {
-      console.log(post);
-      this.posts.push(post);
-      this.dialogVisible=false;
-    },
+    ...mapMutations({
+      createPost: 'post/createPost',
+      setPage: 'post/setPage',
+      setSearchQuery: 'post/setSearchQuery',
+      setSelectedSort: 'post/setSelectedSort',
+    }),
+    ...mapActions({
+      loadMorePosts: 'post/loadMorePosts',
+      fetchPosts: 'post/fetchPosts',
+      showDialog: 'post/showDialog',
+    }),
+    // createPost(post) {
+    //   console.log(post);
+    //   //this.posts.push(post);
+    //   this.createPost()
+    //   this.dialogVisible=false;
+    // },
     removePost(post){
       this.posts = this.posts.filter(p=>p.id!==post.id);
     },
-    showDialog(){
-      this.dialogVisible=true;
-    },
-    async fetchPosts(){
-      try {
-        this.isPostsLoading = true;
-        const response = await axios.get('https://jsonplaceholder.typicode.com/posts',{
-          params:{
-            _page: this.page,
-            _limit: this.limit,
-          }
-        });
-        this.totalPages = Math.ceil(response.headers['x-total-count']/this.limit);
-        this.posts = response.data;
-      }catch (e) {
-        alert(e);
-      }finally {
-        this.isPostsLoading=false;
-      }
-    },
+    // showDialog(){
+    //   this.dialogVisible=true;
+    // },
 
-    async loadMorePosts(){
-      try {
-        this.page+=1;
-        // this.isPostsLoading = true;
-        const response = await axios.get('https://jsonplaceholder.typicode.com/posts',{
-          params:{
-            _page: this.page,
-            _limit: this.limit,
-          }
-        });
-        this.totalPages = Math.ceil(response.headers['x-total-count']/this.limit);
-        this.posts = [...this.posts, ...response.data];
-      }catch (e) {
-        alert(e);
-      }finally {
-        // this.isPostsLoading=false;
-      }
-    },
     // changePage(pageNumber){
     //   this.page = pageNumber;
     // }
@@ -153,14 +122,21 @@ export default {
     // observer.observe(this.$refs.observer);
   },
   computed:{
-    sortedPosts(){ //... - оператор spread, в данном случае создание нового массива на основе существующего
-      return [...this.posts].sort((post1,post2)=>{ //в данном случае sort возвращает новый массив
-        return post1[this.selectedSort]?.localeCompare(post2[this.selectedSort])});
-    },
-
-    sortedAndSearchedPosts(){
-      return this.sortedPosts.filter(post => post.title.toLowerCase().includes(this.searchQuery.toLowerCase()));
-    }
+    ...mapState({
+      posts: state => state.post.posts,
+      dialogVisible: state => state.post.dialogVisible,
+      isPostsLoading: state => state.post.isPostsLoading,
+      selectedSort: state => state.post.selectedSort,
+      searchQuery: state => state.post.searchQuery,
+      page: state => state.post.page, //номер страницы
+      limit: state => state.post.limit, //максимальное количество постов на одной странице
+      totalPages: state => state.post.totalPages, //общее число страниц
+      sortOptions: state => state.post.sortOptions,
+    }),
+    ...mapGetters({
+      sortedPosts: 'post/sortedPosts',
+      sortedAndSearchedPosts: 'post/sortedAndSearchedPosts',
+    })
   },
   watch: { //следим за моделью selectedSort
     // selectedSort(newValue) { //функция-наблюдатель должна иметь такое же имя, что и модель за которой наблюдает
